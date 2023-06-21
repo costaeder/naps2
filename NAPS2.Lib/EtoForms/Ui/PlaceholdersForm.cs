@@ -18,7 +18,8 @@ public class PlaceholdersForm : EtoDialogBase
             (Placeholders.NUMBER_4_DIGITS, UiStrings.AutoIncrementing4Digit),
             (Placeholders.NUMBER_3_DIGITS, UiStrings.AutoIncrementing3Digit),
             (Placeholders.NUMBER_2_DIGITS, UiStrings.AutoIncrementing2Digit),
-            (Placeholders.NUMBER_1_DIGIT, UiStrings.AutoIncrementing1Digit)
+            (Placeholders.NUMBER_1_DIGIT, UiStrings.AutoIncrementing1Digit),
+            (Placeholders.BATCH, "Lote")
         };
 
     private readonly TextBox _fileName = new();

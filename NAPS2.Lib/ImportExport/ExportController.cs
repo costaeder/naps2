@@ -167,7 +167,9 @@ public class ExportController : IExportController
 
     private async Task<bool> DoSavePdf(IList<ProcessedImage> images, ISaveNotify notify, string savePath)
     {
-        var subSavePath = Placeholders.All.Substitute(savePath);
+        string batchNumber = _config.Get(c => c.BatchSettings.BatchScanNumber);
+
+        var subSavePath = Placeholders.All.WithDate(DateTime.Now, batchNumber).Substitute(savePath);
         var state = _imageList.CurrentState;
         if (await RunSavePdfOperation(subSavePath, images))
         {
@@ -180,9 +182,12 @@ public class ExportController : IExportController
 
     private async Task<bool> DoSaveImages(IList<ProcessedImage> images, ISaveNotify notify, string savePath)
     {
+        string batchNumber = _config.Get(c => c.BatchSettings.BatchScanNumber);
+
+
         var op = _operationFactory.Create<SaveImagesOperation>();
         var state = _imageList.CurrentState;
-        if (op.Start(savePath, Placeholders.All.WithDate(DateTime.Now), images, _config.Get(c => c.ImageSettings),
+        if (op.Start(savePath, Placeholders.All.WithDate(DateTime.Now, batchNumber), images, _config.Get(c => c.ImageSettings),
                 savePath))
         {
             _operationProgress.ShowProgress(op);
@@ -221,9 +226,12 @@ public class ExportController : IExportController
     private async Task<bool> RunSavePdfOperation(string filename, IList<ProcessedImage> images,
         EmailMessage? emailMessage = null)
     {
-        var op = _operationFactory.Create<SavePdfOperation>();
 
-        if (op.Start(filename, Placeholders.All.WithDate(DateTime.Now), images, _config.Get(c => c.PdfSettings),
+        string batchNumber = _config.Get(c => c.BatchSettings.BatchScanNumber);
+
+        var op = _operationFactory.Create<SavePdfOperation>();
+        
+        if (op.Start(filename, Placeholders.All.WithDate(DateTime.Now, batchNumber), images, _config.Get(c => c.PdfSettings),
                 _config.DefaultOcrParams(), emailMessage, filename))
         {
             _operationProgress.ShowProgress(op);

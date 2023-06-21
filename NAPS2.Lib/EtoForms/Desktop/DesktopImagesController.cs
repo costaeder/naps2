@@ -28,4 +28,44 @@ public class DesktopImagesController
             }
         };
     }
+
+    public Action<ProcessedImage> ReceiveScannedImageInsert()
+    {
+        var lockObj = new object();
+
+        var selection = this._imageList.Selection.First();
+
+        var index = this._imageList.Images.IndexOf(selection);
+        
+        
+        return scannedImage =>
+        {
+            lock (lockObj)
+            {
+                var uiImage = new UiImage(scannedImage);
+                _imageList.Mutate(new ImageListMutation.InsertAt(index,uiImage), isPassiveInteraction: true);
+                
+            }
+        };
+    }
+
+    public Action<ProcessedImage> ReceiveScannedImageReplace()
+    {
+        var lockObj = new object();
+
+        var selection = this._imageList.Selection.First();
+
+        var index = this._imageList.Images.IndexOf(selection);
+               
+        return scannedImage =>
+        {
+            lock (lockObj)
+            {
+                var uiImage = new UiImage(scannedImage);
+                this._imageList.Mutate(new ImageListMutation.InsertAt(index, uiImage), isPassiveInteraction: true);
+                this._imageList.Mutate(new ImageListMutation.DeleteSelected());
+
+            }
+        };
+    }
 }

@@ -20,6 +20,7 @@ public abstract class Placeholders
     public const string NUMBER_3_DIGITS = "$(nnn)";
     public const string NUMBER_2_DIGITS = "$(nn)";
     public const string NUMBER_1_DIGIT = "$(n)";
+    public const string BATCH = "$(b)";
     public const string FULL_DATE = "$(YYYY)-$(MM)-$(DD)";
     public const string FULL_TIME = "$(hh)_$(mm)_$(ss)";
 
@@ -84,10 +85,12 @@ public abstract class Placeholders
         private static readonly Regex NumberPlaceholderPattern = new Regex(@"\$\(n+\)");
 
         private readonly DateTime? _dateTimeOverride;
+        private readonly string _batchNumber;
 
-        public DefaultPlaceholders(DateTime? dateTimeOverride = null)
+        public DefaultPlaceholders(DateTime? dateTimeOverride = null, string batchNumber = null)
         {
             _dateTimeOverride = dateTimeOverride;
+            this._batchNumber = batchNumber;
         }
 
         /// <summary>
@@ -95,7 +98,7 @@ public abstract class Placeholders
         /// </summary>
         /// <param name="dateTime">The date and time to use.</param>
         /// <returns>The new DefaultPlaceholders object.</returns>
-        public DefaultPlaceholders WithDate(DateTime dateTime) => new DefaultPlaceholders(dateTime);
+        public DefaultPlaceholders WithDate(DateTime dateTime, string batchNumber = null) => new DefaultPlaceholders(dateTime, batchNumber);
 
         [return: NotNullIfNotNull("filePath")]
         public override string? Substitute(string? filePath, bool incrementIfExists = true, int numberSkip = 0,
@@ -123,6 +126,10 @@ public abstract class Placeholders
                 result = result.Insert(result.Length - Path.GetExtension(result).Length, ".");
                 result = SubstituteNumber(result, result.Length - Path.GetExtension(result).Length, autoNumberDigits,
                     numberSkip, incrementIfExists);
+            }
+
+            if (result.Contains("$(b)")) {
+                result = result.Replace("$(b)", _batchNumber);
             }
 
             return result;

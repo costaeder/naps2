@@ -31,6 +31,17 @@ public class DesktopCommands
             Image = iconProvider.GetIcon("control_play_blue"),
             Shortcut = Application.Instance.CommonModifier | Keys.Period
         };
+
+        ScanInsertBefore = new ActionCommand(desktopScanController.ScanInsertBefore)
+        {
+            Text = "Inserir antes"
+        };
+
+        ScanReplace = new ActionCommand(desktopScanController.ScanReplace)
+        {
+            Text = "Substituir"
+        };
+
         NewProfile = new ActionCommand(desktopScanController.ScanWithNewProfile)
         {
             Text = UiStrings.NewProfile,
@@ -315,6 +326,9 @@ public class DesktopCommands
     public ImageListActions ImageListActions => _imageListActions;
 
     public ActionCommand Scan { get; set; }
+    public ActionCommand ScanInsertBefore { get; set; }
+
+    public ActionCommand ScanReplace { get; set; }
     public ActionCommand NewProfile { get; set; }
     public ActionCommand BatchScan { get; set; }
     public ActionCommand Profiles { get; set; }
@@ -369,4 +383,8 @@ public class DesktopCommands
     public ActionCommand SelectAll { get; set; }
     public ActionCommand Copy { get; set; }
     public ActionCommand Paste { get; set; }
+
+    public ActionCommand ReplacePage { get; set; }
+
+  
 }

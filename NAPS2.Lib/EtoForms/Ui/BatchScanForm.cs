@@ -43,6 +43,7 @@ public class BatchScanForm : EtoDialogBase
     private readonly LayoutVisibility _multiVis = new(false);
     private readonly RadioButton _filePerScan;
     private readonly RadioButton _filePerPage;
+    private readonly TextBox _batchNumber;
     private readonly RadioButton _separateByPatchT;
     private readonly LinkButton _moreInfo = C.UrlLink(PATCH_CODE_INFO_URL, UiStrings.MoreInfo);
     private readonly LayoutVisibility _fileVis = new(false);
@@ -70,7 +71,7 @@ public class BatchScanForm : EtoDialogBase
         _filePerPage = new RadioButton(_filePerScan) { Text = UiStrings.OneFilePerPage };
         _separateByPatchT = new RadioButton(_filePerScan) { Text = UiStrings.SeparateByPatchT };
         _filePath = new(this, dialogHelper);
-
+        _batchNumber = new TextBox();
         _start.Click += Start;
         _cancel.Click += Cancel;
         _multipleScansDelay.CheckedChanged += UpdateVisibility;
@@ -117,6 +118,7 @@ public class BatchScanForm : EtoDialogBase
                     _cancel
                 )
             ),
+            L.GroupBox("Lote",_batchNumber),
             L.GroupBox(
                 UiStrings.ScanConfig,
                 L.Column(
@@ -175,6 +177,8 @@ public class BatchScanForm : EtoDialogBase
         _timeBetweenScans.Text = _transactionConfig.Get(c => c.BatchSettings.ScanIntervalSeconds)
             .ToString(CultureInfo.CurrentCulture);
 
+        _batchNumber.Text = _transactionConfig.Get(c => c.BatchSettings.BatchScanNumber);
+
         _load.Checked = _transactionConfig.Get(c => c.BatchSettings.OutputType) == BatchOutputType.Load;
         _saveToSingleFile.Checked =
             _transactionConfig.Get(c => c.BatchSettings.OutputType) == BatchOutputType.SingleFile;
@@ -231,6 +235,8 @@ public class BatchScanForm : EtoDialogBase
         _userTransact.Set(c => c.BatchSettings.SaveSeparator, _filePerScan.Checked ? SaveSeparator.FilePerScan
             : _separateByPatchT.Checked ? SaveSeparator.PatchT
             : SaveSeparator.FilePerPage);
+
+        _userTransact.Set(c => c.BatchSettings.BatchScanNumber, _batchNumber.Text);
 
         _userTransact.Set(c => c.BatchSettings.SavePath, _filePath.Text);
         if (_transactionConfig.Get(c => c.BatchSettings.OutputType) != BatchOutputType.Load &&

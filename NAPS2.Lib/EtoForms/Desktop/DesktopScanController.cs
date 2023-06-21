@@ -108,6 +108,26 @@ public class DesktopScanController : IDesktopScanController
         }
     }
 
+    public async Task ScanInsertBefore()
+    {
+      
+        if (_profileManager.DefaultProfile != null)
+        {
+            await DoScanInsertBefore(_profileManager.DefaultProfile);
+        }
+          
+    }
+
+    public async Task ScanReplace()
+    {
+
+        if (_profileManager.DefaultProfile != null)
+        {
+            await DoScanReplace(_profileManager.DefaultProfile);
+        }
+
+    }
+
     public async Task ScanWithNewProfile()
     {
         var editSettingsForm = _formFactory.Create<EditProfileForm>();
@@ -132,6 +152,7 @@ public class DesktopScanController : IDesktopScanController
 
     private async Task DoScan(ScanProfile profile)
     {
+         
         var images =
             _scanPerformer.PerformScan(profile, DefaultScanParams(), _desktopFormProvider.DesktopForm.NativeHandle);
         var imageCallback = _desktopImagesController.ReceiveScannedImage();
@@ -141,4 +162,30 @@ public class DesktopScanController : IDesktopScanController
         }
         _desktopFormProvider.DesktopForm.BringToFront();
     }
+
+    private async Task DoScanInsertBefore(ScanProfile profile)
+    {
+        var images =
+            _scanPerformer.PerformScan(profile, DefaultScanParams(), _desktopFormProvider.DesktopForm.NativeHandle);
+        var imageCallback = _desktopImagesController.ReceiveScannedImageInsert();
+        await foreach (var image in images)
+        {
+            imageCallback(image);
+        }
+        _desktopFormProvider.DesktopForm.BringToFront();
+    }
+
+    private async Task DoScanReplace(ScanProfile profile)
+    {
+        var images =
+            _scanPerformer.PerformScan(profile, DefaultScanParams(), _desktopFormProvider.DesktopForm.NativeHandle);
+        var imageCallback = _desktopImagesController.ReceiveScannedImageReplace();
+        await foreach (var image in images)
+        {
+            imageCallback(image);
+        }
+        _desktopFormProvider.DesktopForm.BringToFront();
+    }
+
+    
 }

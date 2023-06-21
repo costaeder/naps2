@@ -6,6 +6,8 @@ public class BatchSettings
 {
     public string? ProfileDisplayName { get; set; }
 
+    public string? BatchScanNumber { get; set; }
+
     public BatchScanType ScanType { get; set; }
 
     public int ScanCount { get; set; }

@@ -156,6 +156,8 @@ public abstract class DesktopForm : EtoFormBase
             _contextMenu.Items.AddRange(new List<MenuItem>
             {
                 Commands.ViewImage,
+                Commands.ScanInsertBefore,
+                Commands.ScanReplace,
                 new SeparatorMenuItem(),
                 Commands.SelectAll,
                 Commands.Copy,
@@ -281,7 +283,7 @@ public abstract class DesktopForm : EtoFormBase
         CreateToolbarSeparator();
         if (!hiddenButtons.HasFlag(ToolbarButtons.Image))
             CreateToolbarMenu(Commands.ImageMenu, new MenuProvider()
-                .Append(Commands.ViewImage)
+                .Append(Commands.ViewImage)                
                 .Separator()
                 .Append(Commands.Crop)
                 .Append(Commands.BrightCont)
