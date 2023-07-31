@@ -2,6 +2,7 @@ using NAPS2.EtoForms.Ui;
 using NAPS2.Scan;
 #if !MAC
 using NAPS2.Wia;
+using System.Collections.Immutable;
 #endif
 
 namespace NAPS2.EtoForms.Desktop;
@@ -16,11 +17,12 @@ public class DesktopScanController : IDesktopScanController
     private readonly IDesktopSubFormController _desktopSubFormController;
     private readonly DesktopFormProvider _desktopFormProvider;
     private readonly ThumbnailController _thumbnailController;
+    private readonly UiImageList _imageList;
 
     public DesktopScanController(Naps2Config config, IProfileManager profileManager, IFormFactory formFactory,
         IScanPerformer scanPerformer, DesktopImagesController desktopImagesController,
         IDesktopSubFormController desktopSubFormController, DesktopFormProvider desktopFormProvider,
-        ThumbnailController thumbnailController)
+        ThumbnailController thumbnailController, UiImageList imageList)
     {
         _config = config;
         _profileManager = profileManager;
@@ -30,6 +32,7 @@ public class DesktopScanController : IDesktopScanController
         _desktopSubFormController = desktopSubFormController;
         _desktopFormProvider = desktopFormProvider;
         _thumbnailController = thumbnailController;
+        _imageList = imageList;
     }
 
     private ScanParams DefaultScanParams() =>
@@ -167,10 +170,19 @@ public class DesktopScanController : IDesktopScanController
     {
         var images =
             _scanPerformer.PerformScan(profile, DefaultScanParams(), _desktopFormProvider.DesktopForm.NativeHandle);
-        var imageCallback = _desktopImagesController.ReceiveScannedImageInsert();
+
+        var selection = this._imageList.Selection.First();
+
+
+        var index = this._imageList.Images.IndexOf(selection);
+
+      
+
         await foreach (var image in images)
         {
+            var imageCallback = _desktopImagesController.ReceiveScannedImageInsert(index);
             imageCallback(image);
+            index++;
         }
         _desktopFormProvider.DesktopForm.BringToFront();
     }
@@ -179,13 +191,47 @@ public class DesktopScanController : IDesktopScanController
     {
         var images =
             _scanPerformer.PerformScan(profile, DefaultScanParams(), _desktopFormProvider.DesktopForm.NativeHandle);
-        var imageCallback = _desktopImagesController.ReceiveScannedImageReplace();
+              
+
+        Dictionary<int, int> indexes = GetSelectionIndexes();       
+
+        int count = 1;
+
         await foreach (var image in images)
         {
-            imageCallback(image);
+            var index = GetIndexAtCount(count, indexes);
+            count++;
+            if (index == -1) {
+                continue;
+            }
+            var imageCallback = _desktopImagesController.ReceiveScannedImageReplace(index);
+            imageCallback(image);          
         }
         _desktopFormProvider.DesktopForm.BringToFront();
     }
+
+    public Dictionary<int, int> GetSelectionIndexes() {
+        Dictionary<int, int> indexes = new Dictionary<int, int>();
+        var selection = this._imageList.Selection;
+
+        int count = 1;
+        foreach (var s in selection)
+        {
+            indexes.Add(count, this._imageList.Images.IndexOf(s));
+            count++;
+        }
+        return indexes;
+    }
+
+    private int GetIndexAtCount(int count, Dictionary<int,int> indexes) {
+        if (count > indexes.Count) {
+            return -1;
+        }
+
+        return indexes[count]; 
+    }
+
+
 
     
 }

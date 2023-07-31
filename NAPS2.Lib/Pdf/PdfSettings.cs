@@ -15,6 +15,8 @@ public class PdfSettings
 
     public string? DefaultFileName { get; set; }
 
+    public string? SecondaryFileName { get; set; }
+
     public bool SkipSavePrompt { get; set; }
 
     public bool SinglePagePdfs { get; set; }

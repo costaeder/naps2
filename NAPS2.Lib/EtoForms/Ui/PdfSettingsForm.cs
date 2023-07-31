@@ -9,6 +9,7 @@ namespace NAPS2.EtoForms.Ui;
 public class PdfSettingsForm : EtoDialogBase
 {
     private readonly FilePathWithPlaceholders _defaultFilePath;
+    private readonly FilePathWithPlaceholders _secondaryFilePath;
     private readonly CheckBox _skipSavePrompt = new() { Text = UiStrings.SkipSavePrompt };
     private readonly CheckBox _singlePagePdfs = new() { Text = UiStrings.SinglePageFiles };
     private readonly TextBox _title = new();
@@ -46,12 +47,14 @@ public class PdfSettingsForm : EtoDialogBase
     public PdfSettingsForm(Naps2Config config, DialogHelper dialogHelper) : base(config)
     {
         _defaultFilePath = new(this, dialogHelper) { PdfOnly = true };
+        _secondaryFilePath = new(this, dialogHelper) { PdfOnly = true };
 
         UpdateValues(Config);
         UpdateEnabled();
 
         _restoreDefaults.Click += RestoreDefaults_Click;
         _defaultFilePath.TextChanged += DefaultFilePath_TextChanged;
+        _secondaryFilePath.TextChanged += DefaultFilePath_TextChanged;
         _encryptPdf.CheckedChanged += EncryptPdf_CheckedChanged;
     }
 
@@ -68,6 +71,8 @@ public class PdfSettingsForm : EtoDialogBase
             _defaultFilePath,
             _skipSavePrompt,
             _singlePagePdfs,
+             C.Label("Caminho secundário do arquivo:"),
+              _secondaryFilePath,
             L.GroupBox(
                 UiStrings.Metadata,
                 L.Column(
@@ -81,6 +86,7 @@ public class PdfSettingsForm : EtoDialogBase
                     _keywords
                 )
             ),
+
             L.GroupBox(
                 UiStrings.Encryption,
                 L.Column(
@@ -109,6 +115,7 @@ public class PdfSettingsForm : EtoDialogBase
     private void UpdateValues(Naps2Config config)
     {
         _defaultFilePath.Text = config.Get(c => c.PdfSettings.DefaultFileName);
+        _secondaryFilePath.Text = config.Get(c => c.PdfSettings.SecondaryFileName);
         _skipSavePrompt.Checked = config.Get(c => c.PdfSettings.SkipSavePrompt);
         _singlePagePdfs.Checked = config.Get(c => c.PdfSettings.SinglePagePdfs);
         _title.Text = config.Get(c => c.PdfSettings.Metadata.Title);
@@ -127,7 +134,7 @@ public class PdfSettingsForm : EtoDialogBase
             config.Get(c => c.PdfSettings.Encryption.AllowContentCopyingForAccessibility);
         _permissions[6].Checked = config.Get(c => c.PdfSettings.Encryption.AllowAnnotations);
         _permissions[7].Checked = config.Get(c => c.PdfSettings.Encryption.AllowFormFilling);
-        _compat.SelectedIndex = (int) config.Get(c => c.PdfSettings.Compat);
+        _compat.SelectedIndex = (int)config.Get(c => c.PdfSettings.Compat);
         _rememberSettings.Checked = config.Get(c => c.RememberPdfSettings);
     }
 
@@ -150,6 +157,7 @@ public class PdfSettingsForm : EtoDialogBase
         var pdfSettings = new PdfSettings
         {
             DefaultFileName = _defaultFilePath.Text,
+            SecondaryFileName = _secondaryFilePath.Text,
             SkipSavePrompt = _skipSavePrompt.IsChecked(),
             SinglePagePdfs = _singlePagePdfs.IsChecked(),
             Metadata = new PdfMetadata
@@ -173,7 +181,7 @@ public class PdfSettingsForm : EtoDialogBase
                 AllowAnnotations = _permissions[6].IsChecked(),
                 AllowFormFilling = _permissions[7].IsChecked()
             },
-            Compat = (PdfCompat) _compat.SelectedIndex
+            Compat = (PdfCompat)_compat.SelectedIndex
         };
 
         var runTransact = Config.Run.BeginTransaction();

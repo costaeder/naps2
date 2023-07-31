@@ -26,19 +26,28 @@ public class NotificationArea : IDisposable
 
     private void UpdateViews()
     {
-        foreach (var added in _manager.Notifications.Except(_items.Keys).ToList())
+
+        lock (_manager.Notifications)
         {
-            var view = added.CreateView();
-            view.Manager = _manager;
-            var content = view.CreateContent();
-            Content.Children.Add(content);
-            _items.Add(added, (view, content));
-        }
-        foreach (var removed in _items.Keys.Except(_manager.Notifications).ToList())
-        {
-            var (view, content) = _items[removed];
-            Content.Children.Remove(content);
-            view.Dispose();
+
+            foreach (var added in _manager.Notifications.Except(_items.Keys).ToList())
+            {
+
+                var view = added.CreateView();
+                view.Manager = _manager;
+                var content = view.CreateContent();
+                Content.Children.Add(content);
+                _items.Add(added, (view, content));
+
+            }
+            foreach (var removed in _items.Keys.Except(_manager.Notifications).ToList())
+            {
+
+                var (view, content) = _items[removed];
+                Content.Children.Remove(content);
+                view.Dispose();
+
+            }
         }
     }
 

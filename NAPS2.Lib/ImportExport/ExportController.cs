@@ -51,6 +51,11 @@ public class ExportController : IExportController
 
         if (await DoSavePdf(images, notify, savePath))
         {
+            var secondaryFileName = _config.Get(c => c.PdfSettings.SecondaryFileName);
+            if (!string.IsNullOrEmpty(secondaryFileName) &&  Path.IsPathRooted(secondaryFileName)) {
+                await DoSavePdf(images, notify, secondaryFileName);
+            }
+
             MaybeDeleteAfterSaving(uiImages);
             return true;
         }
@@ -169,7 +174,16 @@ public class ExportController : IExportController
     {
         string batchNumber = _config.Get(c => c.BatchSettings.BatchScanNumber);
 
-        var subSavePath = Placeholders.All.WithDate(DateTime.Now, batchNumber).Substitute(savePath);
+        var placeHolders = Placeholders.All.WithDate(DateTime.Now, batchNumber);
+
+        var subSavePath = placeHolders.Substitute(savePath);
+
+        if (File.Exists(subSavePath))
+        {
+            subSavePath = placeHolders.Substitute(subSavePath, true, 0, 1);
+        }
+
+
         var state = _imageList.CurrentState;
         if (await RunSavePdfOperation(subSavePath, images))
         {

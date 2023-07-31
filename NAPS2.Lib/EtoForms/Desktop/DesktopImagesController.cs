@@ -29,13 +29,13 @@ public class DesktopImagesController
         };
     }
 
-    public Action<ProcessedImage> ReceiveScannedImageInsert()
+    public Action<ProcessedImage> ReceiveScannedImageInsert(int index)
     {
         var lockObj = new object();
 
-        var selection = this._imageList.Selection.First();
+        var selection = ListSelection.FromSelectedIndices(this._imageList.Images,new List<int>() {index });  
 
-        var index = this._imageList.Images.IndexOf(selection);
+        this._imageList.UpdateSelection(selection);
         
         
         return scannedImage =>
@@ -49,21 +49,21 @@ public class DesktopImagesController
         };
     }
 
-    public Action<ProcessedImage> ReceiveScannedImageReplace()
+    public Action<ProcessedImage> ReceiveScannedImageReplace(int index)
     {
         var lockObj = new object();
 
-        var selection = this._imageList.Selection.First();
+        var selection = ListSelection.FromSelectedIndices(this._imageList.Images, new List<int>() { index });
 
-        var index = this._imageList.Images.IndexOf(selection);
-               
+        this._imageList.UpdateSelection(selection);
+
+
         return scannedImage =>
         {
             lock (lockObj)
             {
                 var uiImage = new UiImage(scannedImage);
-                this._imageList.Mutate(new ImageListMutation.InsertAt(index, uiImage), isPassiveInteraction: true);
-                this._imageList.Mutate(new ImageListMutation.DeleteSelected());
+                _imageList.Mutate(new ImageListMutation.ReplaceWith(uiImage), isPassiveInteraction: true);
 
             }
         };

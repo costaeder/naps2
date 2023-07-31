@@ -73,7 +73,9 @@ public class AutoSaver
         try
         {
             bool ok = true;
-            var placeholders = Placeholders.All.WithDate(DateTime.Now);
+            string batchNumber = _config.Get(c => c.BatchSettings.BatchScanNumber);
+
+            var placeholders = Placeholders.All.WithDate(DateTime.Now, batchNumber);
             int i = 0;
             string? firstFileSaved = null;
             var scans = SaveSeparatorHelper.SeparateScans(new[] { images }, settings.Separator).ToList();

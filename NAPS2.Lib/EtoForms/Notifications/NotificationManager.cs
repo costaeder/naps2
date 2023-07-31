@@ -16,10 +16,16 @@ public class NotificationManager
 
     public void Hide(NotificationModel notification)
     {
-        if (Notifications.Remove(notification))
+        lock(Notifications)
         {
-            Updated?.Invoke(this, EventArgs.Empty);
+            if (Notifications.Remove(notification))
+            {
+                Updated?.Invoke(this, EventArgs.Empty);
+            }
         }
+
+       
+
     }
 
     public void StartTimers()
